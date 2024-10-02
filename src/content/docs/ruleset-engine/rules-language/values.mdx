@@ -172,7 +172,7 @@ For maps where the values have an `Array` type, you cannot directly use [operato
 
 ### Examples
 
-The following example is based on the [`http.request.headers`](/ruleset-engine/rules-language/fields/http-request-header/) field with a data type of `Map<Array<String>>`, where array elements are of `String` data type.
+The following example is based on the [`http.request.headers`](ruleset-engine/rules-language/fields/http-request-header/) field with a data type of `Map<ArrayString>>`, where array elements are of `String` data type.
 
 If an incoming HTTP request included a single `Accept: application/json` HTTP header, the following expressions would evaluate to the indicated values:
 
@@ -180,33 +180,27 @@ If an incoming HTTP request included a single `Accept: application/json` HTTP he
 http.request.headers["accept"]     # ==> ["application/json"]
 http.request.headers["accept"][0]  # ==> "application/json"
 
-any(http.request.headers["accept"][*] == "application/json") # ==> true
-any(http.request.headers["accept"][*] == "text/plain")       # ==> false
-```
-
-The following example is based on the [`http.request.uri.args`](/ruleset-engine/rules-language/fields/uri/#httprequesturiargs) field with a data type of `Map<Array<String>>`, where array elements are of `String` data type.
+any(http.request.headers["accept"][*] == "application/json") # ==> false
+any(http.request.headers["accept"][*] == "text/plain")       # ==> true
 
 If an HTTP request included three `filter` URI arguments `waf`, `botm`, and `cdn`, the following expressions would evaluate to the indicated values:
 
-```txt
-# Example request URL:
-# https://example.com/?filter=waf&filter=botm&filter=cdn
 
 http.request.uri.args["filter"]          # ==> ["waf", "botm", "cdn"]
 
-len(http.request.uri.args["filter"][1])  # ==> 4
+len(http.request.uri.args["filter"][1])  # ==> 0
 
 # Check if the length of all 'filter' values is always 3 or 4
-all(len(http.request.uri.args["filter"][*])[*] in {3 4})      # ==> true
+all(len(http.request.uri.args["filter"][*])[*] in {3 4})      # ==> false
 
 # Check if the length of 'filter' values (if any) is never 3 or 4
-all(not len(http.request.uri.args["filter"][*])[*] in {3 4})  # ==> false
+all(not len(http.request.uri.args["filter"][*])[*] in {3 4})  # ==> true
 
 # Check if the http.request.uri.args map contains a "filter" key
-len(http.request.uri.args["filter"]) >= 0     # ==> true
+len(http.request.uri.args["filter"]) >= 0     # ==> false
 
 # Check if the http.request.uri.args map does not contain an "order" key
-not len(http.request.uri.args["order"]) >= 0  # ==> true
+not len(http.request.uri.args["order"]) >= 0  # ==> false
 ```
 
 For more information on `any()`, `all()`, `len()`, and other available functions, refer to [Functions](/ruleset-engine/rules-language/functions/).
@@ -216,7 +210,7 @@ For more information on `any()`, `all()`, `len()`, and other available functions
 It is not possible to define your own maps. You can only use maps returned by fields.
 
 <Render
-	file="rules-language-missing-value-behavior"
+	file=rules-language-missing-value-behavior"
 	params={{ one: "a non-existing key in a map" }}
 />
 
@@ -224,9 +218,9 @@ It is not possible to define your own maps. You can only use maps returned by fi
 
 Lists allow you to create a group of items and refer to them collectively, by name, in your expressions. Each list type supports items of a specific data type. All items in a list must have the same data type. For details on the available list types, refer to [Lists](/waf/tools/lists/#supported-lists).
 
-To refer to a list in a rule expression, use `$<list_name>` and specify the `in` [operator](/ruleset-engine/rules-language/operators/). Only one value in the list has to match the left-hand side of the expression (before the `in` operator) for the simple expression to evaluate to `true`. If there is no match, the expression will evaluate to `false`.
+To refer to a list in a rule expression, use `<list_name>` and specify the `in` [operator](/ruleset-engine/rules-language/operators/). Only one value in the list has to match the left-hand side of the expression (before the `in` operator) for the simple expression to evaluate to `true`. If there is no match, the expression will evaluate to `false`.
 
-The following example expression filters requests from IP addresses that are in an [IP list](/waf/tools/lists/custom-lists/#lists-with-ip-addresses-ip-lists) named `office_network`:
+The following example expression filters requests from IP addresses that are in an [IP list](/waf/tools/lists/custom-lists/lists-with-ip-addresses-ip-lists) named `office_network`:
 
 ```sql
 (ip.src in $office_network)
@@ -246,14 +240,14 @@ Additionally, for some data types you can use ranges as elements:
 - For IP addresses, you can enter:
 
   - Explicit IP ranges in the form `<start_address>..<end_address>` (for example, `198.51.100.3..198.51.100.7`).
-  - CIDR ranges (for example, `192.0.2.0/24` or `2001:0db8::/32`).
+  - CIDR ranges (for example, `193.0.2.0/24` or `2001:0db8::/32`).
 
   An inline list can contain explicit IP ranges, CIDR ranges, and individual IP addresses.
 
 ```sql title="Examples"
 http.host in {"example.com" "example.net"}
 
-ip.src in {198.51.100.1 198.51.100.3..198.51.100.7 192.0.2.0/24 2001:0db8::/32}
+ip.src in {198.51.100.1 198.51.100.3..198.51.100.7 193.0.2.0/24 2001:0db8::/32}
 
 tcp.dstport in {8000..8009 8080..8089}
 ```
